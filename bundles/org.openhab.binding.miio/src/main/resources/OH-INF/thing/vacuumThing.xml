@@ -56,7 +56,7 @@
 			<channel id="state" typeId="state"/>
 			<channel id="state_id" typeId="state_id"/>
 			<channel id="dock_state" typeId="dock_state"/>
-            <channel id="dock_state_id" typeId="dock_state_id"/>
+			<channel id="dock_state_id" typeId="dock_state_id"/>
 			<channel id="segment_status" typeId="segment_status"/>
 			<channel id="map_status" typeId="map_status"/>
 			<channel id="led_status" typeId="led_status"/>
@@ -175,15 +175,15 @@
 		<state readOnly="true"/>
 	</channel-type>
 	<channel-type id="dock_state">
-        <item-type>String</item-type>
-        <label>Dock State</label>
-        <state readOnly="true"/>
-    </channel-type>
-    <channel-type id="dock_state_id">
-        <item-type>Number</item-type>
-        <label>Dock State ID</label>
-        <state readOnly="true"/>
-    </channel-type>
+		<item-type>String</item-type>
+		<label>Dock State</label>
+		<state readOnly="true"/>
+	</channel-type>
+	<channel-type id="dock_state_id">
+		<item-type>Number</item-type>
+		<label>Dock State ID</label>
+		<state readOnly="true"/>
+	</channel-type>
 	<channel-type id="segment_status" advanced="true">
 		<item-type>Number</item-type>
 		<label>Segment Status</label>
@@ -209,11 +209,11 @@
 		<label>Mop cleaning active</label>
 		<state readOnly="true"/>
 	</channel-type>
-    <channel-type id="dock_status">
-        <item-type>Number</item-type>
-        <label>Dock status</label>
-        <state readOnly="true"/>
-    </channel-type>
+	<channel-type id="dock_status">
+		<item-type>Number</item-type>
+		<label>Dock status</label>
+		<state readOnly="true"/>
+	</channel-type>
 
 
 	<!-- Dynamic Status Channels -->
