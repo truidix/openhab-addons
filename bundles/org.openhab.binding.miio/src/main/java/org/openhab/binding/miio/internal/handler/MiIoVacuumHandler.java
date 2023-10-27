@@ -365,6 +365,22 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
         if (deviceCapabilities.containsKey(RobotCababilities.LOCATING)) {
             safeUpdateState(RobotCababilities.LOCATING.getChannel(), statusInfo.getIsLocating());
         }
+        if (deviceCapabilities.containsKey(RobotCababilities.CLEAN_MOP_START)) {
+            safeUpdateState(RobotCababilities.CLEAN_MOP_START.getChannel(), 0);
+        }
+        if (deviceCapabilities.containsKey(RobotCababilities.CLEAN_MOP_STOP)) {
+            safeUpdateState(RobotCababilities.CLEAN_MOP_STOP.getChannel(), 0);
+        }
+        if (deviceCapabilities.containsKey(RobotCababilities.COLLECT_DUST)) {
+            safeUpdateState(RobotCababilities.COLLECT_DUST.getChannel(), 0);
+        }
+        if (deviceCapabilities.containsKey(RobotCababilities.MOP_DRYING)) {
+            safeUpdateState(RobotCababilities.MOP_DRYING.getChannel(), statusInfo.getIsMapDryingActive());
+        }
+        if (deviceCapabilities.containsKey(RobotCababilities.MOP_DRYING_REMAING_TIME)) {
+            updateState(CHANNEL_MOP_TOTALDRYTIME,
+                    new QuantityType<>(TimeUnit.SECONDS.toMinutes(statusInfo.getMopDryTime()), Units.MINUTE));
+        }
         return true;
     }
 
