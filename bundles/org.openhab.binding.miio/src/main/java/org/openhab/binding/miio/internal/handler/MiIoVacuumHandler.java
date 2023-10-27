@@ -565,6 +565,7 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
             case GET_FW_FEATURES:
             case GET_CUSTOMIZED_CLEAN_MODE:
             case GET_MULTI_MAP_LIST:
+
             case SET_COLLECT_DUST:
             case SET_CLEAN_MOP_START:
             case SET_CLEAN_MOP_STOP:
