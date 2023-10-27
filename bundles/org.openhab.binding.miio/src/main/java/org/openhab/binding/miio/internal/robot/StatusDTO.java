@@ -85,6 +85,12 @@ public class StatusDTO {
     @SerializedName("mop_forbidden_enable")
     @Expose
     private Integer mopForbiddenEnable;
+    @SerializedName("dry_status")
+    @Expose
+    private Integer isMopDryingActive;
+    @SerializedName("rdt")
+    @Expose
+    private Long mopDryTime;
 
     public final Integer getMsgVer() {
         return msgVer;
