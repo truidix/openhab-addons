@@ -175,4 +175,12 @@ public class StatusDTO {
     public final Integer getMopForbiddenEnable() {
         return mopForbiddenEnable;
     }
+
+    public Integer getIsMopDryingActive() {
+        return isMopDryingActive;
+    }
+
+    public Long getMopDryTime() {
+        return mopDryTime;
+    }
 }
