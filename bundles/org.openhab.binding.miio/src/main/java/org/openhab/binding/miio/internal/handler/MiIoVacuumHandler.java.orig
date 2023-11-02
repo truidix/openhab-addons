@@ -43,7 +43,6 @@ import org.openhab.binding.miio.internal.cloud.CloudConnector;
 import org.openhab.binding.miio.internal.cloud.CloudUtil;
 import org.openhab.binding.miio.internal.cloud.MiCloudException;
 import org.openhab.binding.miio.internal.robot.ConsumablesType;
-import org.openhab.binding.miio.internal.robot.DockStatusType;
 import org.openhab.binding.miio.internal.robot.FanModeType;
 import org.openhab.binding.miio.internal.robot.RRMapDraw;
 import org.openhab.binding.miio.internal.robot.RRMapDrawOptions;
@@ -96,12 +95,11 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
     private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     private final ChannelUID mapChannelUid;
 
-    private static final Set<RobotCababilities> FEATURES_CHANNELS = Collections.unmodifiableSet(Stream.of(
-            RobotCababilities.SEGMENT_STATUS, RobotCababilities.MAP_STATUS, RobotCababilities.LED_STATUS,
-            RobotCababilities.CARPET_MODE, RobotCababilities.FW_FEATURES, RobotCababilities.ROOM_MAPPING,
-            RobotCababilities.MULTI_MAP_LIST, RobotCababilities.CUSTOMIZE_CLEAN_MODE, RobotCababilities.COLLECT_DUST,
-            RobotCababilities.CLEAN_MOP_START, RobotCababilities.CLEAN_MOP_STOP, RobotCababilities.MOP_DRYING,
-            RobotCababilities.MOP_DRYING_REMAING_TIME, RobotCababilities.DOCK_STATE_ID).collect(Collectors.toSet()));
+    private static final Set<RobotCababilities> FEATURES_CHANNELS = Collections.unmodifiableSet(Stream
+            .of(RobotCababilities.SEGMENT_STATUS, RobotCababilities.MAP_STATUS, RobotCababilities.LED_STATUS,
+                    RobotCababilities.CARPET_MODE, RobotCababilities.FW_FEATURES, RobotCababilities.ROOM_MAPPING,
+                    RobotCababilities.MULTI_MAP_LIST, RobotCababilities.CUSTOMIZE_CLEAN_MODE)
+            .collect(Collectors.toSet()));
 
     private ExpiringCache<String> status;
     private ExpiringCache<String> consumables;
@@ -239,7 +237,6 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
             forceStatusUpdate();
             return;
         }
-
         if (channelUID.getId().equals(RobotCababilities.WATERBOX_MODE.getChannel())) {
             sendCommand(MiIoCommand.SET_WATERBOX_MODE, "[" + command.toString() + "]");
             forceStatusUpdate();
@@ -262,26 +259,6 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
         if (channelUID.getId().equals(CHANNEL_CONSUMABLE_RESET)) {
             sendCommand(MiIoCommand.CONSUMABLES_RESET, "[" + command.toString() + "]");
             updateState(CHANNEL_CONSUMABLE_RESET, new StringType("none"));
-        }
-
-        if (channelUID.getId().equals(RobotCababilities.COLLECT_DUST.getChannel()) && !command.toString().isEmpty()
-                && !command.toString().contentEquals("-")) {
-            sendCommand(MiIoCommand.SET_COLLECT_DUST);
-            forceStatusUpdate();
-            return;
-        }
-
-        if (channelUID.getId().equals(RobotCababilities.CLEAN_MOP_START.getChannel()) && !command.toString().isEmpty()
-                && !command.toString().contentEquals("-")) {
-            sendCommand(MiIoCommand.SET_CLEAN_MOP_START);
-            forceStatusUpdate();
-            return;
-        }
-        if (channelUID.getId().equals(RobotCababilities.CLEAN_MOP_STOP.getChannel()) && !command.toString().isEmpty()
-                && !command.toString().contentEquals("-")) {
-            sendCommand(MiIoCommand.SET_CLEAN_MOP_STOP);
-            forceStatusUpdate();
-            return;
         }
     }
 
@@ -370,12 +347,6 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
             }
             updateState(CHANNEL_VACUUM, vacuum);
         }
-        if (this.deviceCapabilities.containsKey(RobotCababilities.DOCK_STATE_ID)) {
-            DockStatusType state = DockStatusType.getType(statusInfo.getDockErrorStatus().intValue());
-            updateState("status#dock_state", new StringType(state.getDescription()));
-            updateState("status#dock_state_id", new DecimalType(state.getId()));
-        }
-
         if (deviceCapabilities.containsKey(RobotCababilities.WATERBOX_MODE)) {
             safeUpdateState(RobotCababilities.WATERBOX_MODE.getChannel(), statusInfo.getWaterBoxMode());
         }
@@ -393,27 +364,6 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
         }
         if (deviceCapabilities.containsKey(RobotCababilities.LOCATING)) {
             safeUpdateState(RobotCababilities.LOCATING.getChannel(), statusInfo.getIsLocating());
-        }
-        if (deviceCapabilities.containsKey(RobotCababilities.CLEAN_MOP_START)) {
-            safeUpdateState(RobotCababilities.CLEAN_MOP_START.getChannel(), 0);
-        }
-        if (deviceCapabilities.containsKey(RobotCababilities.CLEAN_MOP_STOP)) {
-            safeUpdateState(RobotCababilities.CLEAN_MOP_STOP.getChannel(), 0);
-        }
-        if (deviceCapabilities.containsKey(RobotCababilities.COLLECT_DUST)) {
-            safeUpdateState(RobotCababilities.COLLECT_DUST.getChannel(), 0);
-        }
-        if (this.deviceCapabilities.containsKey(RobotCababilities.DOCK_STATE_ID)) {
-            DockStatusType state = DockStatusType.getType(statusInfo.getDockErrorStatus().intValue());
-            updateState("status#dock_state", new StringType(state.getDescription()));
-            updateState("status#dock_state_id", new DecimalType(state.getId()));
-        }
-        if (deviceCapabilities.containsKey(RobotCababilities.MOP_DRYING)) {
-            safeUpdateState(RobotCababilities.MOP_DRYING.getChannel(), statusInfo.getIsMopDryingActive());
-        }
-        if (deviceCapabilities.containsKey(RobotCababilities.MOP_DRYING_REMAING_TIME)) {
-            updateState(CHANNEL_MOP_TOTALDRYTIME,
-                    new QuantityType<>(TimeUnit.SECONDS.toMinutes(statusInfo.getMopDryTime()), Units.MINUTE));
         }
         return true;
     }
@@ -474,14 +424,10 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
                 ZoneId.systemDefault());
         ZonedDateTime endTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(historyData.get(1).getAsLong()),
                 ZoneId.systemDefault());
-
         long duration = TimeUnit.SECONDS.toMinutes(historyData.get(2).getAsLong());
         double area = historyData.get(3).getAsDouble() / 1000000D;
-
         int error = historyData.get(4).getAsInt();
-
         int finished = historyData.get(5).getAsInt();
-
         JsonObject historyRecord = new JsonObject();
         historyRecord.addProperty("start", startTime.toString());
         historyRecord.addProperty("end", endTime.toString());
@@ -490,17 +436,11 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
         historyRecord.addProperty("error", error);
         historyRecord.addProperty("finished", finished);
         updateState(CHANNEL_HISTORY_START_TIME, new DateTimeType(startTime));
-
         updateState(CHANNEL_HISTORY_END_TIME, new DateTimeType(endTime));
-
         updateState(CHANNEL_HISTORY_DURATION, new QuantityType<>(duration, Units.MINUTE));
-
         updateState(CHANNEL_HISTORY_AREA, new QuantityType<>(area, SIUnits.SQUARE_METRE));
-
         updateState(CHANNEL_HISTORY_ERROR, new DecimalType(error));
-
         updateState(CHANNEL_HISTORY_FINISH, new DecimalType(finished));
-
         updateState(CHANNEL_HISTORY_RECORD, new StringType(historyRecord.toString()));
     }
 
@@ -597,14 +537,12 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
             case CLEAN_SUMMARY_GET:
                 if (response.getResult().isJsonArray()) {
                     updateHistory(response.getResult().getAsJsonArray());
-
                 }
                 break;
             case CLEAN_RECORD_GET:
                 if (response.getResult().isJsonArray() && response.getResult().getAsJsonArray().size() > 0
                         && response.getResult().getAsJsonArray().get(0).isJsonArray()) {
                     updateHistoryRecord(response.getResult().getAsJsonArray().get(0).getAsJsonArray());
-
                 } else {
                     logger.debug("Could not extract cleaning history record from: {}", response);
                 }
@@ -623,12 +561,14 @@ public class MiIoVacuumHandler extends MiIoAbstractHandler {
             case GET_LED_STATUS:
                 updateNumericChannel(response);
                 break;
-
             case GET_CARPET_MODE:
             case GET_FW_FEATURES:
             case GET_CUSTOMIZED_CLEAN_MODE:
             case GET_MULTI_MAP_LIST:
+<<<<<<< HEAD
+=======
 
+>>>>>>> c390c8394b (Added a few new channels:)
             case SET_COLLECT_DUST:
             case SET_CLEAN_MOP_START:
             case SET_CLEAN_MOP_STOP:
